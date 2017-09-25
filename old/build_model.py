@@ -120,7 +120,13 @@ autoencoder.decoding_layers = decoding_layers
 for l in autoencoder.decoding_layers:
     autoencoder.add(l)
 
-autoencoder.add(Reshape((n_labels, img_h * img_w)))
+#model.add(Reshape(( nClasses ,  model.output_shape[-2]*model.output_shape[-1]   ), input_shape=( nClasses , model.output_shape[-2], model.output_shape[-1]  )))
+
+out_ht = autoencoder.output_shape[-2]
+out_wd = autoencoder.output_shape[-1]
+
+autoencoder.add(Reshape((n_labels, out_ht * out_wd), input_shape=(n_labels, out_ht, out_wd)))
+#autoencoder.add(Reshape((n_labels, img_h* img_w)))
 autoencoder.add(Permute((2, 1)))
 autoencoder.add(Activation('softmax'))
 

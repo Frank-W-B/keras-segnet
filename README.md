@@ -4,3 +4,5 @@ Current version **doesn't support index transferring** proposed in SegNet articl
 <br>
 <br>
 ![SegNet architecture](http://mi.eng.cam.ac.uk/projects/segnet/images/segnet.png)
+
+Cloned from https://github.com/imlab-uiip/keras-segnet.git but updated for Keras 2.0 and modified architecture.

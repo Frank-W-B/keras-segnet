@@ -109,13 +109,13 @@ autoencoder.compile(loss="categorical_crossentropy", optimizer=optimizer, metric
 print 'Compiled: OK'
 
 # Train model or load weights
-# train_data, train_label = prep_data('train')
-# nb_epoch = 50
-# batch_size = 18
-# history = autoencoder.fit(train_data, train_label, batch_size=batch_size, nb_epoch=nb_epoch, verbose=1)
-# autoencoder.save_weights('model_5l_weight_ep50.hdf5')
+train_data, train_label = prep_data('train')
+nb_epoch = 50
+batch_size = 18
+history = autoencoder.fit(train_data, train_label, batch_size=batch_size, nb_epoch=nb_epoch, verbose=1)
+autoencoder.save_weights('model_5l_weight_ep50.hdf5')
 
-autoencoder.load_weights('model_5l_weight_ep50.hdf5')
+#autoencoder.load_weights('model_5l_weight_ep50.hdf5')
 
 # Model visualization
 from keras.utils.visualize_util import plot
