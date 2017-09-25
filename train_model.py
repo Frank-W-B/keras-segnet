@@ -101,6 +101,7 @@ if __name__ == '__main__':
     
     # read in data  
     train_data, train_label = prep_data('train')
+    test_data, test_label = prep_data('test')
 
     #if K.image_dim_ordering() == 'th':
     #    X = X_train.reshape(X_train.shape[0], 1, img_rows, img_cols)
@@ -114,16 +115,17 @@ if __name__ == '__main__':
     input_shape = (img_channels, img_h, img_w) # channels first
     model = set_architecture(n_labels, input_shape)
 
-    optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
-    model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
+    #optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
+    model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['accuracy'])
     print('Compiled: OK')
 
-    history = model.fit(train_data, train_label, batch_size=batch_size, epochs=n_epochs, verbose=1) 
+    history = model.fit(train_data, train_label, batch_size=batch_size, epochs=n_epochs,
+                        validation_data = (test_data, test_label), verbose=1) 
     
     #model.save_weights('weights.hdf5')
     #model.load_weights('model_5l_weight_ep50.hdf5')
 
-    test_data, test_label = prep_data('test')
+    #test_data, test_label = prep_data('test')
     score = model.evaluate(test_data, test_label, verbose=0)
     print 'Test score:', score[0]
     print 'Test accuracy:', score[1]
