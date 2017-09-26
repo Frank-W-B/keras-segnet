@@ -55,22 +55,28 @@ def set_architecture(n_classes, img_shape):
     model.add(ZeroPadding2D( (1,1) , data_format='channels_first' ))
     model.add(Conv2D(512, (3, 3), padding='valid', data_format='channels_first'))
     model.add(BatchNormalization(axis=1))
+    model.add(Conv2D(512, (3, 3), padding='same', data_format='channels_first')) # added
+
 
     model.add(UpSampling2D( (2,2), data_format='channels_first'))
     model.add(ZeroPadding2D( (1,1), data_format='channels_first'))
     model.add(Conv2D( 256, (3, 3), padding='valid', data_format='channels_first'))
     model.add(BatchNormalization(axis=1))
+    model.add(Conv2D(256, (3, 3), padding='same', data_format='channels_first')) # added
+
 
     model.add(UpSampling2D( (2,2), data_format='channels_first'))
     model.add(ZeroPadding2D( (1,1), data_format='channels_first'))
     model.add(Conv2D( 128, (3, 3), padding='valid', data_format='channels_first'))
     model.add(BatchNormalization(axis=1))
+    model.add(Conv2D(128, (3, 3), padding='same', data_format='channels_first')) # added
 
     model.add(UpSampling2D( (2,2), data_format='channels_first'))
     model.add(ZeroPadding2D( (1,1), data_format='channels_first'))
     model.add(Conv2D( 64, (3, 3), padding='valid', data_format='channels_first'))
     model.add(BatchNormalization(axis=1))
-
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', data_format='channels_first')) # added
+    
     model.add(Conv2D( n_classes , (3, 3) , padding='same', data_format='channels_first' )) 
     #o_shape = Model(img_input , o ).output_shape
     o_shape = model.output_shape

@@ -6,8 +6,8 @@ from keras import backend as K
 from keras.optimizers import SGD
 from skimage.io import imread
 from matplotlib import pyplot as plt
-
-from architecture import set_architecture
+import time
+from architecture_flexible import set_architecture
 
 os.environ['KERAS_BACKEND'] = 'theano'
 os.environ['THEANO_FLAGS'] = 'mode=FAST_RUN, device=gpu0, floatX=float32, optimizer=fast_compile'
@@ -40,15 +40,15 @@ def prep_data(mode):
     sys.stdout.flush()
     data, label = np.array(data), np.array(label).reshape((n, img_h * img_w, n_labels))
 
-    print mode + ': OK'
-    print '\tshapes: {}, {}'.format(data.shape, label.shape)
-    print '\ttypes:  {}, {}'.format(data.dtype, label.dtype)
-    print '\tmemory: {}, {} MB'.format(data.nbytes / 1048576, label.nbytes / 1048576)
+    print(mode + ': OK')
+    print('\tshapes: {}, {}'.format(data.shape, label.shape))
+    print('\ttypes:  {}, {}'.format(data.dtype, label.dtype))
+    print('\tmemory: {}, {} MB'.format(data.nbytes / 1048576, label.nbytes / 1048576))
 
     return data, label
 
 
-def plot_results(output):
+def plot_results(output, fname):
     gt = []
     df = pd.read_csv(path + 'test.csv')
     for i, item in df.iterrows():
@@ -82,8 +82,8 @@ def plot_results(output):
         rgb[:, :, 2] = gt
         plt.imshow(rgb)
 
-    plt.savefig('result.png')
-    plt.show()
+    plt.savefig(fname)
+    plt.close()
 
 
 if __name__ == '__main__':
@@ -95,10 +95,12 @@ if __name__ == '__main__':
     n_labels = 2      # number of labels
     n_train = 6       # number of samples in train set
     n_test = 3        # number of samples in test set
-    n_epochs = 100    # number of epochs to train
+    n_epochs = 50     # number of epochs to train
     batch_size = 1    # batch size
+   
 
-    
+
+
     # read in data  
     train_data, train_label = prep_data('train')
     test_data, test_label = prep_data('test')
@@ -113,23 +115,28 @@ if __name__ == '__main__':
     #    input_shape = (img_rows, img_cols, 1)
 
     input_shape = (img_channels, img_h, img_w) # channels first
-    model = set_architecture(n_labels, input_shape)
-
-    #optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
-    model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['accuracy'])
-    print('Compiled: OK')
-
-    history = model.fit(train_data, train_label, batch_size=batch_size, epochs=n_epochs,
+    layers_in_block = [1, 2, 3, 4] 
+    for l in layers_in_block:
+        print("Layers in block: {0}".format(l))
+        model = set_architecture(n_labels, input_shape, conv_layers_in_block=l)
+        #optimizer = SGD(lr=0.001, momentum=0.9, decay=0.0005, nesterov=False)
+        model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['accuracy'])
+        print('Compiled')
+        t0 = time.time()
+        history = model.fit(train_data, train_label, batch_size=batch_size, epochs=n_epochs,
                         validation_data = (test_data, test_label), verbose=1) 
-    
-    #model.save_weights('weights.hdf5')
-    #model.load_weights('model_5l_weight_ep50.hdf5')
+        t1 = time.time()
+        elapsed = int(round(t1-t0, 0))
+        #model.save_weights('weights.hdf5')
+        #model.load_weights('model_5l_weight_ep50.hdf5')
 
-    #test_data, test_label = prep_data('test')
-    score = model.evaluate(test_data, test_label, verbose=0)
-    print 'Test score:', score[0]
-    print 'Test accuracy:', score[1]
-
-    output = model.predict(test_data, verbose=0)
-    output = output.reshape((output.shape[0], img_h, img_w, n_labels))
-    plot_results(output)
+        score = model.evaluate(test_data, test_label, verbose=0)
+        loss = round(score[0], 3)
+        accuracy = round(score[1], 3)
+        print("Test loss: {0}".format(loss))
+        print("Test accuracy: {0}".format(accuracy))
+        print("Computation time: {0}".format(elapsed))
+        output = model.predict(test_data, verbose=0)
+        output = output.reshape((output.shape[0], img_h, img_w, n_labels))
+        fname = "L-" + str(l) + "__t-" + str(elapsed) + "s__l-" + str(loss) + "__ac-" + str(accuracy) + "_.png"
+        plot_results(output, fname)
